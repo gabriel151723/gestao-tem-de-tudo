@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MANGUEIRAS AUTO PEÇAS E SERVIÇOS LTDA. — ERP Firestore & Painel Administrativo</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Plus Jakarta Sans (UI) & JetBrains Mono (SKUs, Protocolos, Valores) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #0B0F17;
+      color: #F1F5F9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-[#0B0F17] text-slate-100 antialiased selection:bg-orange-500/30 selection:text-orange-200">
+
+  <!-- ==========================================================================
+       SIDEBAR INDUSTRIAL DE NAVEGAÇÃO (COMPUTADORES E TABLETS DE BALCÃO)
+       ========================================================================== -->
+  <aside class="w-full lg:w-72 bg-[#111827] border-b lg:border-b-0 lg:border-r border-slate-800 flex flex-col shrink-0">
+    <div class="p-5 border-b border-slate-800 flex items-center justify-between lg:block">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-orange-500/15 border border-orange-500/40 flex items-center justify-center text-orange-500 shrink-0">
+          <i data-lucide="wrench" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-bold tracking-normal text-white leading-tight">MANGUEIRAS AUTO PEÇAS</h1>
+          <p class="text-xs text-slate-400 font-mono">ERP Firestore &middot; amazing-descent-8bvhw</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onclick="window.ERPApp.simulateIncomingOrder()"
+        class="lg:hidden px-3 py-1.5 text-xs font-semibold rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors whitespace-nowrap"
+      >
+        + Simular Pedido LP
+      </button>
+    </div>
+
+    <nav class="p-3 flex lg:flex-col gap-1.5 overflow-x-auto" aria-label="Navegação Principal do ERP">
+      <button
+        type="button"
+        id="nav-dashboard"
+        onclick="window.ERPApp.switchTab('dashboard')"
+        class="nav-btn flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 text-left w-full"
+      >
+        <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+        <span>1. Visão Geral / Dashboard</span>
+      </button>
+
+      <button
+        type="button"
+        id="nav-catalog"
+        onclick="window.ERPApp.switchTab('catalog')"
+        class="nav-btn flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 text-left w-full"
+      >
+        <span class="flex items-center gap-3">
+          <i data-lucide="package-search" class="w-4 h-4 shrink-0"></i>
+          <span>2. Catálogo &amp; Estoque</span>
+        </span>
+        <span id="badge-catalog-count" class="text-xs font-mono text-slate-400 tabular-nums">0</span>
+      </button>
+
+      <button
+        type="button"
+        id="nav-orders"
+        onclick="window.ERPApp.switchTab('orders')"
+        class="nav-btn flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 text-left w-full"
+      >
+        <span class="flex items-center gap-3">
+          <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
+          <span>3. Orçamentos / Pedidos</span>
+        </span>
+        <span id="badge-pending-orders" class="text-xs font-mono font-semibold text-orange-400 tabular-nums">0</span>
+      </button>
+
+      <button
+        type="button"
+        id="nav-form"
+        onclick="window.ERPApp.openCreateProductTab()"
+        class="nav-btn flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 text-left w-full"
+      >
+        <i data-lucide="plus-square" class="w-4 h-4 shrink-0"></i>
+        <span id="nav-form-label">4. Novo Cadastro de Produto</span>
+      </button>
+    </nav>
+
+    <div class="hidden lg:flex flex-col gap-3 mt-auto p-4 border-t border-slate-800 bg-[#0D131F]">
+      <div class="text-xs text-slate-400 space-y-1">
+        <p id="firestore-status-badge" class="font-semibold text-emerald-400">Firestore Conectado (Real-Time)</p>
+        <p class="font-mono text-[11px] text-slate-300 truncate">Proj: amazing-descent-8bvhw</p>
+        <p class="font-mono text-[11px] text-slate-400 truncate">Col. Produtos: "products"</p>
+        <p class="font-mono text-[11px] text-slate-400 truncate">Col. Pedidos: "orders" (itemsCount &gt;= 1)</p>
+      </div>
+      <button
+        type="button"
+        onclick="window.ERPApp.simulateIncomingOrder()"
+        class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+      >
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        <span>Simular Pedido da Landing Page</span>
+      </button>
+      <button
+        type="button"
+        onclick="window.ERPApp.resetDatabaseToDefaults()"
+        class="w-full py-1.5 px-3 rounded-lg border border-slate-700 hover:border-slate-600 text-slate-300 hover:text-white text-xs transition-colors whitespace-nowrap"
+      >
+        Sincronizar Base Padrão (12 Peças)
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       ÁREA PRINCIPAL DE CONTEÚDO DO PAINEL ADMINISTRATIVO
+       ========================================================================== -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="h-16 px-6 bg-[#111827] border-b border-slate-800 flex items-center justify-between gap-4 shrink-0">
+      <div class="flex items-center gap-3 min-w-0">
+        <span class="text-sm text-slate-400 hidden sm:inline">Mangueiras Auto Peças e Serviços Ltda.</span>
+        <span class="text-slate-600 hidden sm:inline">/</span>
+        <h2 id="header-view-title" class="text-base font-bold text-white truncate">Visão Geral / Dashboard</h2>
+      </div>
+      <div class="flex items-center gap-3 shrink-0">
+        <span id="last-sync-timestamp" class="text-xs font-mono text-slate-400 hidden md:inline tabular-nums">Firestore Online</span>
+        <button
+          type="button"
+          onclick="window.ERPApp.openCreateProductTab()"
+          class="px-3.5 py-2 rounded-lg bg-orange-500 hover:bg-orange-400 text-slate-950 font-semibold text-xs transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0"
+        >
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Cadastrar Peça</span>
+        </button>
+      </div>
+    </header>
+
+    <div id="incoming-order-banner" class="hidden bg-emerald-950/90 border-b border-emerald-500/40 px-6 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <i data-lucide="bell-ring" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+        <p id="incoming-order-banner-text" class="text-sm text-emerald-100 font-medium">
+          Novo orçamento recebido da Landing Page!
+        </p>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          onclick="window.ERPApp.switchTab('orders'); document.getElementById('incoming-order-banner').classList.add('hidden');"
+          class="px-3 py-1.5 rounded-md bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400 transition-colors whitespace-nowrap"
+        >
+          Abrir Pedido Agora
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('incoming-order-banner').classList.add('hidden')"
+          class="p-1 text-emerald-300 hover:text-white"
+          aria-label="Fechar alerta"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <main class="flex-1 p-6 max-w-[1440px] w-full mx-auto space-y-6">
+      <!-- ABA 1: VISÃO GERAL / DASHBOARD -->
+      <section id="tab-dashboard" class="space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="bg-[#111827] border border-slate-800 rounded-xl p-5">
+            <p class="text-xs font-medium text-slate-400">Peças na Coleção "products"</p>
+            <p id="kpi-total-products" class="text-3xl font-bold text-white font-mono tabular-nums mt-2">0</p>
+            <p id="kpi-stock-breakdown" class="text-xs text-slate-400 mt-2">0 disponíveis &middot; 0 sob encomenda</p>
+          </div>
+
+          <div class="bg-[#111827] border border-slate-800 rounded-xl p-5">
+            <p class="text-xs font-medium text-slate-400">Orçamentos Pendentes de Análise</p>
+            <p id="kpi-pending-orders" class="text-3xl font-bold text-orange-400 font-mono tabular-nums mt-2">0</p>
+            <p class="text-xs text-slate-400 mt-2">Escutando coleção "orders" (itemsCount &gt;= 1)</p>
+          </div>
+
+          <div class="bg-[#111827] border border-slate-800 rounded-xl p-5">
+            <p class="text-xs font-medium text-slate-400">Orçamentos Respondidos</p>
+            <p id="kpi-replied-orders" class="text-3xl font-bold text-sky-400 font-mono tabular-nums mt-2">0</p>
+            <p class="text-xs text-slate-400 mt-2">Em negociação ativa no WhatsApp</p>
+          </div>
+
+          <div class="bg-[#111827] border border-slate-800 rounded-xl p-5">
+            <p class="text-xs font-medium text-slate-400">Vendas Concluídas (Faturado)</p>
+            <p id="kpi-completed-revenue" class="text-2xl font-bold text-emerald-400 font-mono tabular-nums mt-2">R$ 0,00</p>
+            <p id="kpi-completed-count" class="text-xs text-slate-400 mt-2">0 pedidos concluídos no período</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-[#111827] border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                <div>
+                  <h3 class="text-base font-bold text-white">Orçamentos Recentes da Landing Page (Firestore)</h3>
+                  <p class="text-xs text-slate-400">Listener em tempo real: <code class="font-mono text-orange-400">query(collection(db, "orders"), where("itemsCount", "&gt;=", 1))</code></p>
+                </div>
+                <button
+                  type="button"
+                  onclick="window.ERPApp.switchTab('orders')"
+                  class="text-xs font-semibold text-orange-400 hover:text-orange-300 whitespace-nowrap"
+                >
+                  Ver Todos os Pedidos &rarr;
+                </button>
+              </div>
+              <div id="dashboard-recent-orders" class="divide-y divide-slate-800/80 mt-2"></div>
+            </div>
+          </div>
+
+          <div class="bg-[#111827] border border-slate-800 rounded-xl p-5 flex flex-col justify-between space-y-5">
+            <div>
+              <h3 class="text-base font-bold text-white pb-4 border-b border-slate-800">Estoque por Categoria de Veículo</h3>
+              <div id="dashboard-category-bars" class="space-y-3 mt-4"></div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex flex-col gap-2">
+              <button
+                type="button"
+                onclick="window.ERPApp.openCreateProductTab()"
+                class="w-full py-2.5 px-4 rounded-lg bg-orange-500 hover:bg-orange-400 text-slate-950 font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Novo Cadastro de Produto</span>
+              </button>
+              <button
+                type="button"
+                onclick="window.ERPApp.switchTab('catalog')"
+                class="w-full py-2.5 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-colors flex items-center justify-center gap-2"
+              >
+                <i data-lucide="layers" class="w-4 h-4"></i>
+                <span>Gerenciar Catálogo Completo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 2: CATÁLOGO & ESTOQUE -->
+      <section id="tab-catalog" class="hidden space-y-5">
+        <div class="bg-[#111827] border border-slate-800 rounded-xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-2">
+            <label for="filter-search" class="block text-xs font-medium text-slate-400 mb-1">Buscar por SKU, OEM, Nome ou Aplicação</label>
+            <input
+              id="filter-search"
+              type="text"
+              placeholder="Ex: MNG-MAN-010, A3660300417, Hilux, Freio..."
+              oninput="window.ERPApp.renderCatalog()"
+              class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2 text-sm text-white placeholder-slate-500 outline-none"
+            />
+          </div>
+          <div>
+            <label for="filter-category" class="block text-xs font-medium text-slate-400 mb-1">Categoria de Veículo</label>
+            <select
+              id="filter-category"
+              onchange="window.ERPApp.renderCatalog()"
+              class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3 py-2 text-sm text-white outline-none"
+            >
+              <option value="ALL">Todas as Categorias</option>
+              <option value="Linha Pesada / Diesel (Caminhões e Ônibus)">Linha Pesada / Diesel (Caminhões e Ônibus)</option>
+              <option value="Máquinas Pesadas & Agrícolas (Tratores, Guindastes, Motoniveladoras)">Máquinas Pesadas &amp; Agrícolas</option>
+              <option value="Utilitários (Pick-ups e Vans)">Utilitários (Pick-ups e Vans)</option>
+              <option value="Linha Leve (Carros de Passeio)">Linha Leve (Carros de Passeio)</option>
+              <option value="Motos">Motos</option>
+              <option value="Embarcações">Embarcações</option>
+            </select>
+          </div>
+          <div>
+            <label for="filter-stock" class="block text-xs font-medium text-slate-400 mb-1">Disponibilidade</label>
+            <select
+              id="filter-stock"
+              onchange="window.ERPApp.renderCatalog()"
+              class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3 py-2 text-sm text-white outline-none"
+            >
+              <option value="ALL">Todos os Status</option>
+              <option value="Disponível para Cotação">Disponível (stock &gt; 0)</option>
+              <option value="Sob Encomenda">Sob Encomenda (stock = 0)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 bg-[#0E1420] text-xs font-semibold text-slate-400">
+                  <th class="py-3.5 px-4">ID / SKU &amp; OEM</th>
+                  <th class="py-3.5 px-4">Nome da Peça &amp; Sistema</th>
+                  <th class="py-3.5 px-4">Categoria</th>
+                  <th class="py-3.5 px-4">Aplicação Detalhada</th>
+                  <th class="py-3.5 px-4">Estoque (stock &gt;= 0)</th>
+                  <th class="py-3.5 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="catalog-table-body" class="divide-y divide-slate-800/80 text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 3: GESTÃO DE ORÇAMENTOS / PEDIDOS -->
+      <section id="tab-orders" class="hidden space-y-5">
+        <div class="bg-[#111827] border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="text-base font-bold text-white">Central de Orçamentos e Pedidos Recebidos</h3>
+            <p class="text-xs text-slate-400">Sincronizado em tempo real via Firestore <code class="font-mono text-emerald-400">orders (where("itemsCount", "&gt;=", 1))</code></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select
+              id="filter-order-status"
+              onchange="window.ERPApp.renderOrders()"
+              class="bg-[#0B0F17] border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none"
+              aria-label="Filtrar por status do pedido"
+            >
+              <option value="ALL">Todos os Status</option>
+              <option value="Pendente de Análise">Pendente de Análise</option>
+              <option value="Orçamento Respondido no WhatsApp">Orçamento Respondido no WhatsApp</option>
+              <option value="Venda Concluída">Venda Concluída</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+            <button
+              type="button"
+              onclick="window.ERPApp.simulateIncomingOrder()"
+              class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors whitespace-nowrap"
+            >
+              + Simular Orçamento da Landing Page
+            </button>
+          </div>
+        </div>
+
+        <div id="orders-list-container" class="space-y-4"></div>
+      </section>
+
+      <!-- ABA 4: NOVO CADASTRO / EDIÇÃO DE PRODUTO NO FIRESTORE -->
+      <section id="tab-form" class="hidden max-w-3xl mx-auto">
+        <div class="bg-[#111827] border border-slate-800 rounded-xl p-6 space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h3 id="form-heading" class="text-lg font-bold text-white">Novo Cadastro de Produto no Firestore</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Sincroniza automaticamente na coleção <code class="font-mono text-orange-400">products</code> do banco compartilhado com a Landing Page.</p>
+            </div>
+            <button
+              type="button"
+              onclick="window.ERPApp.switchTab('catalog')"
+              class="text-xs text-slate-400 hover:text-white"
+            >
+              Cancelar e Voltar
+            </button>
+          </div>
+
+          <form id="product-form" onsubmit="window.ERPApp.handleSaveProduct(event)" class="space-y-4" novalidate>
+            <input type="hidden" id="prod-id" value="" />
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label for="prod-sku" class="block text-xs font-medium text-slate-300 mb-1">SKU / ID do Documento *</label>
+                <input
+                  id="prod-sku"
+                  type="text"
+                  required
+                  placeholder="Ex: MNG-MAN-015"
+                  class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2.5 text-sm font-mono text-white outline-none"
+                />
+              </div>
+              <div>
+                <label for="prod-oem" class="block text-xs font-medium text-slate-300 mb-1">Código OEM / Norma *</label>
+                <input
+                  id="prod-oem"
+                  type="text"
+                  required
+                  placeholder="Ex: DIN-EN853-2SN"
+                  class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2.5 text-sm font-mono text-white outline-none"
+                />
+              </div>
+              <div>
+                <label for="prod-stock" class="block text-xs font-medium text-slate-300 mb-1">Estoque (stock &gt;= 0) *</label>
+                <input
+                  id="prod-stock"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value="10"
+                  required
+                  class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2.5 text-sm font-mono text-white outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="prod-name" class="block text-xs font-medium text-slate-300 mb-1">Nome da Peça *</label>
+              <input
+                id="prod-name"
+                type="text"
+                required
+                placeholder="Ex: Mangueira Hidráulica Alta Pressão SAE 100R2AT / 2SN"
+                class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="prod-category" class="block text-xs font-medium text-slate-300 mb-1">Categoria de Veículo *</label>
+                <select
+                  id="prod-category"
+                  required
+                  class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none"
+                >
+                  <option value="Linha Pesada / Diesel (Caminhões e Ônibus)">Linha Pesada / Diesel (Caminhões e Ônibus)</option>
+                  <option value="Máquinas Pesadas & Agrícolas (Tratores, Guindastes, Motoniveladoras)">Máquinas Pesadas &amp; Agrícolas (Tratores, Guindastes, Motoniveladoras)</option>
+                  <option value="Utilitários (Pick-ups e Vans)">Utilitários (Pick-ups e Vans)</option>
+                  <option value="Linha Leve (Carros de Passeio)">Linha Leve (Carros de Passeio)</option>
+                  <option value="Motos">Motos</option>
+                  <option value="Embarcações">Embarcações</option>
+                </select>
+              </div>
+              <div>
+                <label for="prod-system" class="block text-xs font-medium text-slate-300 mb-1">Sistema Automotivo *</label>
+                <select
+                  id="prod-system"
+                  required
+                  class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none"
+                >
+                  <option value="Mangueiras e Conexões">Mangueiras e Conexões</option>
+                  <option value="Componentes de Motor">Componentes de Motor</option>
+                  <option value="Sistemas de Freio">Sistemas de Freio</option>
+                  <option value="Suspensão e Direção">Suspensão e Direção</option>
+                  <option value="Transmissão e Hidráulica">Transmissão e Hidráulica</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="prod-application" class="block text-xs font-medium text-slate-300 mb-1">Aplicação Detalhada *</label>
+              <textarea
+                id="prod-application"
+                rows="3"
+                required
+                placeholder="Ex: Compatível com caminhões Mercedes-Benz OM 366, Scania Série R, tratores Case IH..."
+                class="w-full bg-[#0B0F17] border border-slate-700 focus:border-orange-500 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none"
+              ></textarea>
+            </div>
+
+            <div class="flex items-center justify-between bg-[#0B0F17] border border-slate-800 rounded-lg p-3.5">
+              <label for="prod-demo" class="text-xs font-medium text-slate-300">Marcar campo booleano <code className="font-mono text-orange-400">demo</code></label>
+              <input id="prod-demo" type="checkbox" checked class="w-4 h-4 accent-orange-500" />
+            </div>
+
+            <p id="form-error-msg" class="hidden text-xs text-rose-400 font-medium"></p>
+
+            <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onclick="window.ERPApp.switchTab('catalog')"
+                class="px-4 py-2.5 rounded-lg border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                class="px-5 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-400 text-slate-950 text-xs font-bold transition-colors"
+              >
+                Salvar no Firestore e Sincronizar com a Landing Page
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL DE COTAÇÃO COMERCIAL -->
+  <div id="quote-modal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="quote-modal-title">
+    <div class="bg-[#111827] border border-slate-700 rounded-xl max-w-3xl w-full p-6 space-y-5 my-8">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h3 id="quote-modal-title" class="text-lg font-bold text-white">Ajustar Preço Comercial e Gerar Resposta para o Cliente</h3>
+          <p id="quote-modal-subtitle" class="text-xs text-slate-400 font-mono mt-0.5"></p>
+        </div>
+        <button
+          type="button"
+          onclick="window.ERPApp.closeQuoteModal()"
+          class="text-slate-400 hover:text-white p-1"
+          aria-label="Fechar modal de cotação"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="quote-items-pricing" class="space-y-3"></div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-800">
+        <div>
+          <label for="quote-discount" class="block text-xs text-slate-400 mb-1">Desconto Comercial (%)</label>
+          <input
+            id="quote-discount"
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            value="0"
+            oninput="window.ERPApp.recalculateQuoteModal()"
+            class="w-full bg-[#0B0F17] border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-white"
+          />
+        </div>
+        <div>
+          <label for="quote-freight" class="block text-xs text-slate-400 mb-1">Frete / Despacho (R$)</label>
+          <input
+            id="quote-freight"
+            type="number"
+            min="0"
+            step="5"
+            value="0"
+            oninput="window.ERPApp.recalculateQuoteModal()"
+            class="w-full bg-[#0B0F17] border border-slate-700 rounded-lg px-3 py-2 text-sm font-mono text-white"
+          />
+        </div>
+        <div>
+          <label for="quote-payment" class="block text-xs text-slate-400 mb-1">Condição de Pagamento</label>
+          <input
+            id="quote-payment"
+            type="text"
+            value="PIX à vista ou Faturado 28 DDL"
+            oninput="window.ERPApp.recalculateQuoteModal()"
+            class="w-full bg-[#0B0F17] border border-slate-700 rounded-lg px-3 py-2 text-sm text-white"
+          />
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="quote-whatsapp-preview" class="text-xs font-semibold text-emerald-400">Resumo Pronto para Colar no WhatsApp do Cliente</label>
+          <span id="quote-final-total-badge" class="text-sm font-bold font-mono text-white tabular-nums">Total: R$ 0,00</span>
+        </div>
+        <textarea
+          id="quote-whatsapp-preview"
+          rows="9"
+          readonly
+          class="w-full bg-[#0B0F17] border border-slate-700 rounded-lg p-3.5 text-xs font-mono text-slate-200 leading-relaxed"
+        ></textarea>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
+        <span id="quote-copy-feedback" class="text-xs font-semibold text-emerald-400"></span>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            onclick="window.ERPApp.copyQuoteToClipboard()"
+            class="px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors flex items-center gap-2"
+          >
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>Copiar Resposta para WhatsApp e Marcar Respondido</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MOTOR JAVASCRIPT + FIREBASE FIRESTORE SDK (MODULAR CDN)
+       ========================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      deleteDoc,
+      onSnapshot,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    /**
+     * CONFIGURAÇÃO EXATA DO FIREBASE COMPARTILHADA COM A LANDING PAGE:
+     */
+    const firebaseConfig = {
+      projectId: "amazing-descent-8bvhw",
+      appId: "1:192311340733:web:48c47e10556745501391d4",
+      apiKey: "AIzaSyAXhmDAiTY-gozzN99g9xgoE2kGkjaVDH8",
+      authDomain: "amazing-descent-8bvhw.firebaseapp.com",
+      firestoreDatabaseId: "ai-studio-mangueirasengenh-32e9732f-8e30-4eaf-bc45-b518026cd7f1",
+      storageBucket: "amazing-descent-8bvhw.firebasestorage.app",
+      messagingSenderId: "192311340733"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
+    const PRODUCTS_STORAGE_KEY = 'mangueiras_products_db';
+    const ORDERS_STORAGE_KEY = 'mangueiras_orders_db';
+    const ERP_SYNC_CHANNEL = 'mangueiras_erp_sync';
+
+    const INITIAL_PRODUCTS = [
+      { id: 'MNG-MOT-001', sku: 'MNG-MOT-001', name: 'Kit Pistão e Anéis Diesel Forged', oem: 'A3660300417', category: 'Linha Pesada / Diesel (Caminhões e Ônibus)', system: 'Componentes de Motor', application: 'Motor Mercedes-Benz OM 366 / OM 352; caminhões e ônibus rodoviários.', stock: 8, demo: true },
+      { id: 'MNG-MOT-002', sku: 'MNG-MOT-002', name: 'Filtro de Óleo Blindado Linha Diesel', oem: 'LF16015', category: 'Linha Pesada / Diesel (Caminhões e Ônibus)', system: 'Componentes de Motor', application: 'Motores Cummins ISF 3.8 e Série C; linha de caminhões leves e médios.', stock: 24, demo: true },
+      { id: 'MNG-FRE-003', sku: 'MNG-FRE-003', name: 'Válvula Pneumática Pedal de Freio', oem: 'II-35197', category: 'Linha Pesada / Diesel (Caminhões e Ônibus)', system: 'Sistemas de Freio', application: 'Sistemas de freio a ar de caminhões e ônibus pesados.', stock: 4, demo: true },
+      { id: 'MNG-HID-004', sku: 'MNG-HID-004', name: 'Bomba Hidráulica de Engrenagens Dupla', oem: '9510080', category: 'Máquinas Pesadas & Agrícolas (Tratores, Guindastes, Motoniveladoras)', system: 'Transmissão e Hidráulica', application: 'Tratores agrícolas, pás-carregadeiras e motoniveladoras.', stock: 0, demo: true },
+      { id: 'MNG-MOT-005', sku: 'MNG-MOT-005', name: 'Filtro Separador de Água e Combustível', oem: 'R120LJ-10M', category: 'Máquinas Pesadas & Agrícolas (Tratores, Guindastes, Motoniveladoras)', system: 'Componentes de Motor', application: 'Tratores, colheitadeiras e escavadeiras com motores diesel Common Rail.', stock: 16, demo: true },
+      { id: 'MNG-SUS-006', sku: 'MNG-SUS-006', name: 'Amortecedor Dianteiro Pressurizado Heavy-Duty', oem: '48510-09A10', category: 'Utilitários (Pick-ups e Vans)', system: 'Suspensão e Direção', application: 'Toyota Hilux 2.8 Diesel 4x4 e utilitários de carga.', stock: 6, demo: true },
+      { id: 'MNG-MOT-007', sku: 'MNG-MOT-007', name: 'Kit Correia Dentada e Tensor Rolamentado', oem: '030198119E', category: 'Linha Leve (Carros de Passeio)', system: 'Componentes de Motor', application: 'Volkswagen Gol, Voyage, Saveiro e Fox com motor EA111 1.0/1.6 8V.', stock: 12, demo: true },
+      { id: 'MNG-FRE-008', sku: 'MNG-FRE-008', name: 'Disco de Freio Dianteiro Ventilado e Perfurado', oem: '94752854', category: 'Linha Leve (Carros de Passeio)', system: 'Sistemas de Freio', application: 'Chevrolet Onix, Prisma e utilitários leves.', stock: 10, demo: true },
+      { id: 'MNG-TRA-009', sku: 'MNG-TRA-009', name: 'Kit Relação Transmissão Aço 1045 Temperado', oem: '06406-KRE-G01', category: 'Motos', system: 'Transmissão e Hidráulica', application: 'Honda CG 160 / Bros 160; conjunto corrente retentorizada, coroa e pinhão.', stock: 14, demo: true },
+      { id: 'MNG-MAN-010', sku: 'MNG-MAN-010', name: 'Mangueira Hidráulica Alta Pressão SAE 100R2AT / 2SN', oem: 'DIN-EN853-2SN', category: 'Máquinas Pesadas & Agrícolas (Tratores, Guindastes, Motoniveladoras)', system: 'Mangueiras e Conexões', application: 'Linha hidráulica de máquinas pesadas; bitola 1/2 pol, dupla trama de aço.', stock: 30, demo: true },
+      { id: 'MNG-MAN-011', sku: 'MNG-MAN-011', name: 'Conexão Hidráulica Prensável JIC 37° Fêmea Giratória', oem: 'JIC-37F-08', category: 'Linha Pesada / Diesel (Caminhões e Ônibus)', system: 'Mangueiras e Conexões', application: 'Terminais de alta pressão para mangueiras de implementos rodoviários.', stock: 40, demo: true },
+      { id: 'MNG-MOT-012', sku: 'MNG-MOT-012', name: 'Rotor de Bomba de Água Marítima em Neoprene', oem: '3862567', category: 'Embarcações', system: 'Componentes de Motor', application: 'Sistema de arrefecimento de motores centro-rabeta e diesel marítimo.', stock: 0, demo: true }
+    ];
+
+    const INITIAL_ORDERS = [
+      {
+        id: 'ord-01',
+        protocol: '#PED-2026-8491',
+        createdAt: '03/11/2026 às 09:14:22',
+        customerName: 'Transportadora TransRota Sul (Marcos Vinicius)',
+        customerPhone: '5541998421109',
+        cityState: 'Curitiba / PR',
+        vehicleInfo: 'Scania R440 6x4 Streamline 2018 (Frota #14)',
+        itemsCount: 6,
+        items: [
+          { sku: 'MNG-FRE-003', name: 'Válvula Pneumática Pedal de Freio', quantity: 2, unitPrice: 540.00 },
+          { sku: 'MNG-MAN-011', name: 'Conexão Hidráulica Prensável JIC 37° Fêmea Giratória', quantity: 4, unitPrice: 95.00 }
+        ],
+        status: 'Pendente de Análise',
+        freightCost: 85.00,
+        discountPercent: 5
+      }
+    ];
+
+    window.ERPApp = {
+      currentTab: 'dashboard',
+      products: [...INITIAL_PRODUCTS],
+      orders: [...INITIAL_ORDERS],
+      activeQuoteOrderId: null,
+      channel: typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(ERP_SYNC_CHANNEL) : null,
+
+      init() {
+        this.setupFirestoreListeners();
+        this.switchTab('dashboard');
+      },
+
+      setupFirestoreListeners() {
+        // 1. Escuta em tempo real a coleção "products" (where("stock", ">=", 0))
+        const productsQ = query(collection(db, "products"), where("stock", ">=", 0));
+        onSnapshot(productsQ, (snap) => {
+          if (!snap.empty) {
+            this.products = snap.docs.map((d) => {
+              const data = d.data();
+              return {
+                id: String(data.id || d.id),
+                sku: String(data.sku || d.id),
+                name: String(data.name || ''),
+                oem: String(data.oem || 'S/REF'),
+                category: String(data.category || ''),
+                system: String(data.system || ''),
+                application: String(data.application || ''),
+                stock: Math.max(0, Number(data.stock || 0)),
+                demo: Boolean(data.demo)
+              };
+            }).sort((a, b) => a.sku.localeCompare(b.sku));
+            localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(this.products));
+            this.updateSyncClock();
+            this.renderAll();
+          }
+        });
+
+        // 2. Escuta em tempo real a coleção "orders" (where("itemsCount", ">=", 1))
+        const ordersQ = query(collection(db, "orders"), where("itemsCount", ">=", 1));
+        onSnapshot(ordersQ, (snap) => {
+          if (!snap.empty) {
+            const fsOrders = snap.docs.map((d) => {
+              const raw = d.data();
+              return {
+                id: String(raw.id || d.id),
+                protocol: String(raw.protocol || `#PED-${d.id.slice(0, 6).toUpperCase()}`),
+                createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : 'Recente',
+                customerName: String(raw.customerName || raw.name || 'Cliente Landing Page'),
+                customerPhone: String(raw.customerPhone || raw.phone || ''),
+                cityState: String(raw.cityState || raw.customerCity || 'Brasil'),
+                vehicleInfo: String(raw.vehicleInfo || raw.vehicle || 'Veículo informado'),
+                itemsCount: Number(raw.itemsCount || 1),
+                items: Array.isArray(raw.items) ? raw.items : [{ sku: 'COTACAO-LP', name: String(raw.itemsSummary || 'Peças solicitadas'), quantity: Number(raw.itemsCount || 1), unitPrice: 0 }],
+                status: 'Pendente de Análise',
+                freightCost: 0,
+                discountPercent: 0
+              };
+            });
+            this.orders = [...fsOrders, ...this.orders.filter((o) => !fsOrders.some((f) => f.id === o.id))];
+            this.updateSyncClock();
+            this.renderAll();
+          }
+        });
+      },
+
+      updateSyncClock() {
+        const el = document.getElementById('last-sync-timestamp');
+        if (el) {
+          el.textContent = `Firestore Sync às ${new Date().toLocaleTimeString('pt-BR')}`;
+        }
+      },
+
+      formatBRL(value) {
+        return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      },
+
+      switchTab(tab) {
+        this.currentTab = tab;
+        const tabs = ['dashboard', 'catalog', 'orders', 'form'];
+        tabs.forEach((t) => {
+          const section = document.getElementById(`tab-${t}`);
+          const btn = document.getElementById(`nav-${t}`);
+          if (section) section.classList.toggle('hidden', t !== tab);
+          if (btn) {
+            btn.className = t === tab
+              ? 'nav-btn flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold bg-orange-500 text-slate-950 transition-colors whitespace-nowrap shrink-0 text-left w-full'
+              : 'nav-btn flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/70 hover:text-white transition-colors whitespace-nowrap shrink-0 text-left w-full';
+          }
+        });
+        this.renderAll();
+      },
+
+      openCreateProductTab() {
+        document.getElementById('prod-id').value = '';
+        document.getElementById('prod-sku').value = '';
+        document.getElementById('prod-sku').disabled = false;
+        document.getElementById('prod-oem').value = '';
+        document.getElementById('prod-name').value = '';
+        document.getElementById('prod-stock').value = '10';
+        document.getElementById('prod-application').value = '';
+        document.getElementById('prod-demo').checked = true;
+        document.getElementById('form-heading').textContent = 'Novo Cadastro de Produto no Firestore';
+        this.switchTab('form');
+      },
+
+      editProduct(id) {
+        const prod = this.products.find((p) => p.id === id);
+        if (!prod) return;
+        document.getElementById('prod-id').value = prod.id;
+        document.getElementById('prod-sku').value = prod.sku;
+        document.getElementById('prod-sku').disabled = true;
+        document.getElementById('prod-oem').value = prod.oem;
+        document.getElementById('prod-name').value = prod.name;
+        document.getElementById('prod-category').value = prod.category;
+        document.getElementById('prod-system').value = prod.system;
+        document.getElementById('prod-application').value = prod.application;
+        document.getElementById('prod-stock').value = prod.stock;
+        document.getElementById('prod-demo').checked = Boolean(prod.demo);
+        document.getElementById('form-heading').textContent = `Editar Peça no Firestore: ${prod.id}`;
+        this.switchTab('form');
+      },
+
+      async deleteProduct(id) {
+        await deleteDoc(doc(db, "products", id));
+      },
+
+      async handleSaveProduct(event) {
+        event.preventDefault();
+        const rawId = document.getElementById('prod-id').value.trim();
+        const rawSku = document.getElementById('prod-sku').value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '-');
+        const id = rawId || rawSku;
+        const oem = document.getElementById('prod-oem').value.trim();
+        const name = document.getElementById('prod-name').value.trim();
+        const category = document.getElementById('prod-category').value;
+        const system = document.getElementById('prod-system').value;
+        const application = document.getElementById('prod-application').value.trim();
+        const stock = Math.max(0, Math.floor(Number(document.getElementById('prod-stock').value) || 0));
+        const demo = Boolean(document.getElementById('prod-demo').checked);
+        const errEl = document.getElementById('form-error-msg');
+
+        if (!id || !name || !oem || !application) {
+          errEl.textContent = 'Preencha todos os campos obrigatórios (SKU, OEM, Nome e Aplicação).';
+          errEl.classList.remove('hidden');
+          return;
+        }
+
+        const payload = { id, sku: id, name, oem, category, system, application, stock, demo };
+        await setDoc(doc(db, "products", id), payload);
+        this.switchTab('catalog');
+      },
+
+      updateOrderStatus(orderId, newStatus) {
+        this.orders = this.orders.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o));
+        this.renderAll();
+      },
+
+      openQuoteModal(orderId) {
+        const order = this.orders.find((o) => o.id === orderId);
+        if (!order) return;
+        this.activeQuoteOrderId = orderId;
+        document.getElementById('quote-modal-subtitle').textContent = `${order.protocol} · ${order.customerName} · ${order.vehicleInfo}`;
+        const container = document.getElementById('quote-items-pricing');
+        container.innerHTML = order.items.map((item) => `
+          <div class="bg-[#0B0F17] border border-slate-800 rounded-lg p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-xs font-mono text-orange-400">${item.sku} &middot; Qtd: ${item.quantity} un.</p>
+              <p class="text-sm font-medium text-white">${item.name}</p>
+            </div>
+            <div class="w-full sm:w-44 shrink-0">
+              <label class="block text-[11px] text-slate-400 mb-1">Valor Unitário (R$)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                data-sku="${item.sku}"
+                value="${item.unitPrice || 0}"
+                oninput="window.ERPApp.recalculateQuoteModal()"
+                class="quote-unit-input w-full bg-[#111827] border border-slate-700 rounded-md px-3 py-1.5 text-sm font-mono text-white"
+              />
+            </div>
+          </div>
+        `).join('');
+        this.recalculateQuoteModal();
+        document.getElementById('quote-modal').classList.remove('hidden');
+      },
+
+      closeQuoteModal() {
+        document.getElementById('quote-modal').classList.add('hidden');
+      },
+
+      recalculateQuoteModal() {
+        const order = this.orders.find((o) => o.id === this.activeQuoteOrderId);
+        if (!order) return;
+        const inputs = document.querySelectorAll('.quote-unit-input');
+        const priceMap = {};
+        inputs.forEach((inp) => {
+          priceMap[inp.getAttribute('data-sku')] = parseFloat(inp.value) || 0;
+        });
+        const discountPct = parseFloat(document.getElementById('quote-discount').value) || 0;
+        const freight = parseFloat(document.getElementById('quote-freight').value) || 0;
+        let subtotal = 0;
+        const itemLines = order.items.map((item, idx) => {
+          const unit = priceMap[item.sku] ?? item.unitPrice ?? 0;
+          const lineTotal = unit * item.quantity;
+          subtotal += lineTotal;
+          return `${idx + 1}. *[${item.sku}]* ${item.name} — Qtd: ${item.quantity} x ${this.formatBRL(unit)} = *${this.formatBRL(lineTotal)}*`;
+        });
+        const discountAmt = (subtotal * discountPct) / 100;
+        const finalTotal = Math.max(0, subtotal - discountAmt + freight);
+        document.getElementById('quote-final-total-badge').textContent = `Total: ${this.formatBRL(finalTotal)}`;
+        document.getElementById('quote-whatsapp-preview').value = [
+          `*MANGUEIRAS AUTO PEÇAS E SERVIÇOS LTDA.*`,
+          `Protocolo *${order.protocol}* — Cliente: ${order.customerName}`,
+          ...itemLines,
+          `*TOTAL DO ORÇAMENTO:* *${this.formatBRL(finalTotal)}*`
+        ].join('\n');
+      },
+
+      copyQuoteToClipboard() {
+        const preview = document.getElementById('quote-whatsapp-preview');
+        navigator.clipboard.writeText(preview.value);
+        if (this.activeQuoteOrderId) {
+          this.updateOrderStatus(this.activeQuoteOrderId, 'Orçamento Respondido no WhatsApp');
+        }
+        document.getElementById('quote-copy-feedback').textContent = 'Resumo copiado!';
+      },
+
+      simulateIncomingOrder() {
+        const seq = Math.floor(8500 + Math.random() * 1400);
+        const p1 = this.products[0] || INITIAL_PRODUCTS[0];
+        const newOrder = {
+          id: 'ord-' + Date.now(),
+          protocol: `#PED-2026-${seq}`,
+          createdAt: new Date().toLocaleString('pt-BR'),
+          customerName: 'Usina Boa Vista Bioenergia',
+          customerPhone: '5516997128834',
+          cityState: 'Ribeirão Preto / SP',
+          vehicleInfo: 'Mercedes-Benz Actros 2651 6x4',
+          itemsCount: 2,
+          items: [{ sku: p1.sku, name: p1.name, quantity: 2, unitPrice: 385 }],
+          status: 'Pendente de Análise'
+        };
+        this.orders.unshift(newOrder);
+        this.renderAll();
+      },
+
+      async resetDatabaseToDefaults() {
+        for (const item of INITIAL_PRODUCTS) {
+          await setDoc(doc(db, "products", item.id), item);
+        }
+      },
+
+      renderAll() {
+        document.getElementById('badge-catalog-count').textContent = this.products.length;
+        const pendingCount = this.orders.filter((o) => o.status === 'Pendente de Análise').length;
+        document.getElementById('badge-pending-orders').textContent = pendingCount;
+        this.renderDashboard();
+        this.renderCatalog();
+        this.renderOrders();
+        if (window.lucide) window.lucide.createIcons();
+      },
+
+      renderDashboard() {
+        const avail = this.products.filter((p) => p.stock > 0).length;
+        const onOrder = this.products.filter((p) => p.stock === 0).length;
+        const pending = this.orders.filter((o) => o.status === 'Pendente de Análise').length;
+        const replied = this.orders.filter((o) => o.status === 'Orçamento Respondido no WhatsApp').length;
+        document.getElementById('kpi-total-products').textContent = this.products.length;
+        document.getElementById('kpi-stock-breakdown').textContent = `${avail} disponíveis · ${onOrder} sob encomenda`;
+        document.getElementById('kpi-pending-orders').textContent = pending;
+        document.getElementById('kpi-replied-orders').textContent = replied;
+
+        const recentEl = document.getElementById('dashboard-recent-orders');
+        recentEl.innerHTML = this.orders.slice(0, 4).map((o) => `
+          <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <p class="text-xs font-mono text-orange-400">${o.protocol} &middot; <span class="text-slate-400">${o.createdAt}</span></p>
+              <p class="text-sm font-semibold text-white">${o.customerName}</p>
+              <p class="text-xs text-slate-400">${o.vehicleInfo}</p>
+            </div>
+            <button
+              type="button"
+              onclick="window.ERPApp.openQuoteModal('${o.id}')"
+              class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-orange-400 whitespace-nowrap"
+            >
+              Cotar / Responder
+            </button>
+          </div>
+        `).join('');
+
+        const categories = Array.from(new Set(this.products.map((p) => p.category)));
+        const barsEl = document.getElementById('dashboard-category-bars');
+        barsEl.innerHTML = categories.map((cat) => {
+          const count = this.products.filter((p) => p.category === cat).length;
+          const pct = this.products.length ? Math.round((count / this.products.length) * 100) : 0;
+          return `
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium truncate">${cat}</span>
+                <span class="font-mono text-slate-400 tabular-nums shrink-0">${count} ${count === 1 ? 'peça' : 'peças'} (${pct}%)</span>
+              </div>
+              <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-orange-500 rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      },
+
+      renderCatalog() {
+        const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
+        const cat = document.getElementById('filter-category')?.value || 'ALL';
+        const stockFilter = document.getElementById('filter-stock')?.value || 'ALL';
+
+        const filtered = this.products.filter((p) => {
+          const mSearch = !search || p.sku.toLowerCase().includes(search) || p.oem.toLowerCase().includes(search) || p.name.toLowerCase().includes(search) || p.application.toLowerCase().includes(search);
+          const mCat = cat === 'ALL' || p.category === cat;
+          const mStock = stockFilter === 'ALL' || (stockFilter === 'Disponível para Cotação' ? p.stock > 0 : p.stock === 0);
+          return mSearch && mCat && mStock;
+        });
+
+        const tbody = document.getElementById('catalog-table-body');
+        tbody.innerHTML = filtered.map((p) => `
+          <tr class="hover:bg-slate-800/40 transition-colors">
+            <td class="py-3.5 px-4 font-mono text-xs">
+              <span class="font-bold text-orange-400">${p.sku}</span>
+              <div class="text-[11px] text-slate-400">OEM: ${p.oem}</div>
+            </td>
+            <td class="py-3.5 px-4">
+              <p class="font-semibold text-white">${p.name}</p>
+              <p class="text-xs text-slate-400">${p.system}</p>
+            </td>
+            <td class="py-3.5 px-4 text-xs text-slate-300">${p.category}</td>
+            <td class="py-3.5 px-4 text-xs text-slate-400 max-w-xs">${p.application}</td>
+            <td class="py-3.5 px-4 text-xs font-mono font-semibold ${p.stock > 0 ? 'text-emerald-400' : 'text-amber-400'}">${p.stock} un.</td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <button type="button" onclick="window.ERPApp.editProduct('${p.id}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 mr-1.5">Editar</button>
+              <button type="button" onclick="window.ERPApp.deleteProduct('${p.id}')" class="px-2.5 py-1 rounded bg-rose-950/60 hover:bg-rose-900/80 text-xs text-rose-300">Excluir</button>
+            </td>
+          </tr>
+        `).join('');
+      },
+
+      renderOrders() {
+        const statusFilter = document.getElementById('filter-order-status')?.value || 'ALL';
+        const filtered = this.orders.filter((o) => statusFilter === 'ALL' || o.status === statusFilter);
+        const container = document.getElementById('orders-list-container');
+        const statuses = ['Pendente de Análise', 'Orçamento Respondido no WhatsApp', 'Venda Concluída', 'Cancelado'];
+
+        container.innerHTML = filtered.map((o) => `
+          <article class="bg-[#111827] border border-slate-800 rounded-xl p-5 space-y-4">
+            <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-4">
+              <div>
+                <span class="font-mono text-sm font-bold text-orange-400">${o.protocol}</span>
+                <h4 class="text-base font-bold text-white mt-1">${o.customerName}</h4>
+                <p class="text-xs text-slate-300 mt-0.5">WhatsApp: <span class="font-mono">${o.customerPhone}</span> &middot; Cidade/UF: ${o.cityState}</p>
+                <p class="text-xs text-emerald-400 mt-1 font-medium">Veículo / Máquina: ${o.vehicleInfo}</p>
+              </div>
+              <button
+                type="button"
+                onclick="window.ERPApp.openQuoteModal('${o.id}')"
+                class="px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold text-xs"
+              >
+                Ajustar Preço e Gerar Resposta para o Cliente
+              </button>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5">
+              ${statuses.map((st) => `
+                <button
+                  type="button"
+                  onclick="window.ERPApp.updateOrderStatus('${o.id}', '${st}')"
+                  class="px-3 py-1.5 rounded-md text-xs font-medium ${o.status === st ? 'bg-emerald-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300'}"
+                >${st}</button>
+              `).join('')}
+            </div>
+          </article>
+        `).join('');
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => window.ERPApp.init());
+  </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Peça automotiva ou hidráulica cadastrada no Catálogo e Controle de Estoque do ERP.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identificador único da peça (igual ao ID do documento no Firestore).",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "sku": {
+          "type": "string",
+          "description": "Código SKU comercial/técnico da peça.",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "name": {
+          "type": "string",
+          "description": "Nome comercial e técnico da peça.",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "oem": {
+          "type": "string",
+          "description": "Código de referência original OEM ou norma técnica (SAE/DIN).",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "category": {
+          "type": "string",
+          "description": "Categoria de veículo ou equipamento.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "system": {
+          "type": "string",
+          "description": "Sistema automotivo ou hidráulico.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "application": {
+          "type": "string",
+          "description": "Aplicação detalhada em veículos, motores ou máquinas.",
+          "minLength": 3,
+          "maxLength": 600
+        },
+        "stock": {
+          "type": "number",
+          "description": "Saldo numérico de estoque (>= 0)."
+        },
+        "demo": {
+          "type": "boolean",
+          "description": "Indica se o registro faz parte do catálogo demonstrativo padrão."
+        }
+      },
+      "required": [
+        "id",
+        "sku",
+        "name",
+        "oem",
+        "category",
+        "system",
+        "application",
+        "stock",
+        "demo"
+      ]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Orçamento ou pedido comercial registrado no sistema de gestão.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID do pedido",
+          "maxLength": 128
+        },
+        "protocol": {
+          "type": "string",
+          "description": "Protocolo comercial do orçamento",
+          "maxLength": 64
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Nome do cliente ou empresa",
+          "maxLength": 160
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Telefone / WhatsApp de contato",
+          "maxLength": 40
+        },
+        "cityState": {
+          "type": "string",
+          "description": "Cidade e UF do cliente",
+          "maxLength": 120
+        },
+        "vehicleInfo": {
+          "type": "string",
+          "description": "Veículo, caminhão ou máquina informada",
+          "maxLength": 500
+        },
+        "itemsCount": {
+          "type": "number",
+          "description": "Quantidade total de itens solicitados no orçamento (>= 1)"
+        },
+        "items": {
+          "type": "array",
+          "description": "Lista estruturada de peças do pedido (até 100 itens)."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status comercial do pedido",
+          "maxLength": 80
+        },
+        "notes": {
+          "type": "string",
+          "description": "Observações técnicas ou comerciais do pedido",
+          "maxLength": 1000
+        },
+        "freightCost": {
+          "type": "number",
+          "description": "Valor do frete configurado para o pedido"
+        },
+        "discountPercent": {
+          "type": "number",
+          "description": "Percentual de desconto comercial (0 a 100)"
+        },
+        "paymentTerms": {
+          "type": "string",
+          "description": "Condições de pagamento",
+          "maxLength": 240
+        },
+        "deliveryLeadTime": {
+          "type": "string",
+          "description": "Prazo de entrega",
+          "maxLength": 240
+        },
+        "stockDeducted": {
+          "type": "boolean",
+          "description": "Indica se as peças do catálogo já tiveram baixa no estoque"
+        }
+      },
+      "required": [
+        "customerName",
+        "itemsCount"
+      ]
+    },
+    "SolicitacaoOrcamento": {
+      "title": "SolicitacaoOrcamento",
+      "description": "Solicitação de orçamento livre enviada pelo cliente na Landing Page (dados do cliente, veículo e peça digitados livremente) na coleção solicitacoes_orcamento.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID único da solicitação de orçamento.",
+          "maxLength": 128
+        },
+        "protocolo": {
+          "type": "string",
+          "description": "Código de protocolo da solicitação.",
+          "maxLength": 64
+        },
+        "nome_cliente": {
+          "type": "string",
+          "description": "Nome do cliente ou empresa solicitante.",
+          "maxLength": 160
+        },
+        "whatsapp": {
+          "type": "string",
+          "description": "Número de WhatsApp do cliente.",
+          "maxLength": 40
+        },
+        "dados_veiculo": {
+          "type": "string",
+          "description": "Modelo, ano, placa ou chassi do veículo/máquina digitado pelo cliente.",
+          "maxLength": 500
+        },
+        "peca_solicitada": {
+          "type": "string",
+          "description": "Descrição livre da peça solicitada pelo cliente na cotação.",
+          "maxLength": 5000
+        },
+        "cliente": {
+          "type": "object",
+          "description": "Objeto com dados do cliente enviado pela Landing Page (nome, telefone/whatsapp)."
+        },
+        "veiculo": {
+          "type": "object",
+          "description": "Objeto com dados do veículo enviado pela Landing Page (modelo, ano, placa, chassi)."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status da solicitação: pendente, respondido, fechado ou cancelado.",
+          "enum": [
+            "pendente",
+            "respondido",
+            "fechado",
+            "cancelado"
+          ]
+        },
+        "data_criacao": {
+          "type": "string",
+          "description": "Data e horário de envio da solicitação.",
+          "maxLength": 80
+        },
+        "horario_exibicao": {
+          "type": "string",
+          "description": "Data e hora formatada em PT-BR para exibição.",
+          "maxLength": 80
+        },
+        "timestamp_ms": {
+          "type": "number",
+          "description": "Timestamp Unix em milissegundos da criação da solicitação."
+        },
+        "custo_fornecedor": {
+          "type": "number",
+          "description": "Custo do fornecedor inserido na calculadora rápida."
+        },
+        "margem_lucro": {
+          "type": "number",
+          "description": "Percentual de margem de lucro aplicado na calculadora rápida."
+        },
+        "preco_final": {
+          "type": "number",
+          "description": "Preço final calculado para o cliente."
+        },
+        "condicoes_pagamento": {
+          "type": "string",
+          "description": "Condições comerciais de pagamento configuradas na resposta.",
+          "maxLength": 240
+        },
+        "prazo_entrega": {
+          "type": "string",
+          "description": "Prazo de entrega ou disponibilidade informada ao cliente.",
+          "maxLength": 240
+        },
+        "observacoes": {
+          "type": "string",
+          "description": "Observações técnicas ou comerciais da solicitação.",
+          "maxLength": 1000
+        },
+        "frete": {
+          "type": "number",
+          "description": "Valor do frete ou despacho configurado para o orçamento."
+        },
+        "desconto_percentual": {
+          "type": "number",
+          "description": "Percentual de desconto comercial aplicado no orçamento."
+        },
+        "precos_itens": {
+          "type": "object",
+          "description": "Mapa com o preço individual comercial definido para cada peça solicitada."
+        },
+        "itens_proposta": {
+          "type": "array",
+          "description": "Lista estruturada de peças da proposta comercial (até 100 itens, incluindo peças vinculadas ou adicionadas do estoque)."
+        },
+        "estoque_baixado": {
+          "type": "boolean",
+          "description": "Indica se as peças do catálogo vinculadas a este orçamento já tiveram baixa automática no estoque."
+        }
+      },
+      "required": [
+        "peca_solicitada",
+        "status"
+      ]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Coleção principal de produtos e controle de estoque interno do ERP."
+    },
+    "/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/Order"
+      },
+      "description": "Coleção de pedidos e orçamentos estruturados."
+    },
+    "/solicitacoes_orcamento/{solicitacaoId}": {
+      "schema": {
+        "$ref": "#/entities/SolicitacaoOrcamento"
+      },
+      "description": "Coleção centralizada de solicitações de orçamento livres enviadas pelos clientes na Landing Page."
+    }
+  }
+}

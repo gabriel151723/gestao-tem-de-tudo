@@ -1,0 +1,6 @@
+{
+  "name": "Mangueiras Auto Peças — ERP & Painel Administrativo",
+  "description": "Sistema Administrativo ERP de Cadastro de Produtos, Controle de Estoque e Gestão de Orçamentos em Tempo Real da Mangueiras Auto Peças e Serviços Ltda.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

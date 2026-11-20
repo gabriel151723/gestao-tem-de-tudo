@@ -1,0 +1,252 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll(['id', 'sku', 'name', 'oem', 'category', 'system', 'application', 'stock', 'demo'])
+        && data.keys().hasOnly(['id', 'sku', 'name', 'oem', 'category', 'system', 'application', 'stock', 'demo'])
+        && data.id is string && data.id.size() >= 1 && data.id.size() <= 128
+        && data.sku is string && data.sku.size() >= 2 && data.sku.size() <= 64
+        && data.name is string && data.name.size() >= 3 && data.name.size() <= 200
+        && data.oem is string && data.oem.size() >= 1 && data.oem.size() <= 100
+        && data.category is string && data.category.size() >= 2 && data.category.size() <= 120
+        && data.system is string && data.system.size() >= 2 && data.system.size() <= 120
+        && data.application is string && data.application.size() >= 3 && data.application.size() <= 600
+        && data.stock is number && data.stock >= 0 && data.stock <= 1000000
+        && data.demo is bool;
+    }
+
+    function isValidOrderFields(data) {
+      return data.itemsCount is number && data.itemsCount >= 1 && data.itemsCount <= 10000
+        && (!('id' in data) || (data.id is string && data.id.size() <= 128))
+        && (!('protocol' in data) || (data.protocol is string && data.protocol.size() <= 64))
+        && (!('orderCode' in data) || (data.orderCode is string && data.orderCode.size() <= 64))
+        && (!('customerName' in data) || (data.customerName is string && data.customerName.size() <= 160))
+        && (!('customerPhone' in data) || (data.customerPhone is string && data.customerPhone.size() <= 40))
+        && (!('cityState' in data) || (data.cityState is string && data.cityState.size() <= 120))
+        && (!('vehicleInfo' in data) || (data.vehicleInfo is string && data.vehicleInfo.size() <= 500))
+        && (!('status' in data) || (data.status is string && data.status.size() <= 80))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        && (!('freightCost' in data) || (data.freightCost is number && data.freightCost >= 0 && data.freightCost <= 10000000))
+        && (!('discountPercent' in data) || (data.discountPercent is number && data.discountPercent >= 0 && data.discountPercent <= 100))
+        && (!('paymentTerms' in data) || (data.paymentTerms is string && data.paymentTerms.size() <= 240))
+        && (!('deliveryLeadTime' in data) || (data.deliveryLeadTime is string && data.deliveryLeadTime.size() <= 240))
+        && (!('stockDeducted' in data) || data.stockDeducted is bool)
+        && (!('items' in data) || (data.items is list && data.items.size() <= 100));
+    }
+
+    function isValidOrderCreate(data) {
+      return data.keys().hasOnly([
+          'id',
+          'protocol',
+          'orderCode',
+          'createdAt',
+          'timestamp_ms',
+          'customerName',
+          'name',
+          'clientName',
+          'customerPhone',
+          'phone',
+          'whatsapp',
+          'cityState',
+          'customerCity',
+          'city',
+          'vehicleInfo',
+          'vehicle',
+          'machine',
+          'itemsCount',
+          'items',
+          'itemsSummary',
+          'itemsText',
+          'productName',
+          'sku',
+          'status',
+          'notes',
+          'freightCost',
+          'discountPercent',
+          'paymentTerms',
+          'deliveryLeadTime',
+          'solicitacaoId',
+          'stockDeducted',
+          'updatedAt'
+        ])
+        && isValidOrderFields(data);
+    }
+
+    function isValidSolicitacaoOrcamentoFields(data) {
+      return ('status' in data)
+        && data.status is string
+        && data.status in ['pendente', 'respondido', 'fechado', 'cancelado']
+        && (!('id' in data) || (data.id is string && data.id.size() <= 128))
+        && (!('protocolo' in data) || (data.protocolo is string && data.protocolo.size() <= 64))
+        && (!('protocol' in data) || (data.protocol is string && data.protocol.size() <= 64))
+        && (!('nome_cliente' in data) || (data.nome_cliente is string && data.nome_cliente.size() <= 160))
+        && (!('whatsapp' in data) || (data.whatsapp is string && data.whatsapp.size() <= 40) || data.whatsapp is number)
+        && (!('cliente' in data) || data.cliente is map || (data.cliente is string && data.cliente.size() <= 500))
+        && (!('dados_veiculo' in data) || (data.dados_veiculo is string && data.dados_veiculo.size() <= 500) || data.dados_veiculo is map)
+        && (!('veiculo' in data) || data.veiculo is map || (data.veiculo is string && data.veiculo.size() <= 500))
+        && (!('peca_solicitada' in data) || (data.peca_solicitada is string && data.peca_solicitada.size() <= 5000) || (data.peca_solicitada is list && data.peca_solicitada.size() <= 100))
+        && (!('data_criacao' in data) || (data.data_criacao is string && data.data_criacao.size() <= 80) || data.data_criacao is timestamp || data.data_criacao is map)
+        && (!('horario_exibicao' in data) || (data.horario_exibicao is string && data.horario_exibicao.size() <= 80))
+        && (!('timestamp_ms' in data) || (data.timestamp_ms is number && data.timestamp_ms >= 0))
+        && (!('custo_fornecedor' in data) || (data.custo_fornecedor is number && data.custo_fornecedor >= 0 && data.custo_fornecedor <= 10000000))
+        && (!('margem_lucro' in data) || (data.margem_lucro is number && data.margem_lucro >= 0 && data.margem_lucro <= 10000))
+        && (!('preco_final' in data) || (data.preco_final is number && data.preco_final >= 0 && data.preco_final <= 100000000))
+        && (!('condicoes_pagamento' in data) || (data.condicoes_pagamento is string && data.condicoes_pagamento.size() <= 240))
+        && (!('paymentTerms' in data) || (data.paymentTerms is string && data.paymentTerms.size() <= 240))
+        && (!('prazo_entrega' in data) || (data.prazo_entrega is string && data.prazo_entrega.size() <= 240))
+        && (!('deliveryLeadTime' in data) || (data.deliveryLeadTime is string && data.deliveryLeadTime.size() <= 240))
+        && (!('observacoes' in data) || (data.observacoes is string && data.observacoes.size() <= 1000))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        && (!('frete' in data) || (data.frete is number && data.frete >= 0 && data.frete <= 10000000))
+        && (!('freightCost' in data) || (data.freightCost is number && data.freightCost >= 0 && data.freightCost <= 10000000))
+        && (!('desconto_percentual' in data) || (data.desconto_percentual is number && data.desconto_percentual >= 0 && data.desconto_percentual <= 100))
+        && (!('discountPercent' in data) || (data.discountPercent is number && data.discountPercent >= 0 && data.discountPercent <= 100))
+        && (!('precos_itens' in data) || data.precos_itens is map)
+        && (!('itens_proposta' in data) || (data.itens_proposta is list && data.itens_proposta.size() <= 100))
+        && (!('estoque_baixado' in data) || data.estoque_baixado is bool);
+    }
+
+    function isValidSolicitacaoOrcamentoCreate(data) {
+      return data.keys().hasOnly([
+          'id',
+          'protocolo',
+          'protocol',
+          'nome_cliente',
+          'cliente_nome',
+          'nome',
+          'customerName',
+          'cliente',
+          'whatsapp',
+          'telefone',
+          'phone',
+          'customerPhone',
+          'dados_veiculo',
+          'veiculo',
+          'vehicleInfo',
+          'vehicle',
+          'modelo',
+          'ano',
+          'placa',
+          'chassi',
+          'peca_solicitada',
+          'peca',
+          'itens',
+          'items',
+          'itemsSummary',
+          'descricao',
+          'observacoes',
+          'notes',
+          'cidade',
+          'customerCity',
+          'cityState',
+          'quantidade',
+          'itemsCount',
+          'status',
+          'data_criacao',
+          'createdAt',
+          'horario_exibicao',
+          'timestamp_ms',
+          'data_atualizacao',
+          'updatedAt',
+          'custo_fornecedor',
+          'margem_lucro',
+          'preco_final',
+          'condicoes_pagamento',
+          'paymentTerms',
+          'prazo_entrega',
+          'deliveryLeadTime',
+          'frete',
+          'freightCost',
+          'desconto',
+          'desconto_percentual',
+          'discountPercent',
+          'precos_itens',
+          'itens_proposta',
+          'estoque_baixado',
+          'origem',
+          'source'
+        ])
+        && isValidSolicitacaoOrcamentoFields(data);
+    }
+
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if existing().stock >= 0;
+      allow create: if isValidId(productId) && isValidProduct(incoming()) && incoming().id == productId;
+      allow update: if isValidId(productId) && isValidProduct(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(productId);
+    }
+
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId);
+      allow list: if existing().itemsCount >= 1;
+      allow create: if isValidId(orderId) && isValidOrderCreate(incoming());
+      allow update: if isValidId(orderId)
+        && isValidOrderFields(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'status',
+          'items',
+          'itemsCount',
+          'notes',
+          'freightCost',
+          'discountPercent',
+          'paymentTerms',
+          'deliveryLeadTime',
+          'stockDeducted',
+          'solicitacaoId',
+          'updatedAt'
+        ]);
+      allow delete: if isValidId(orderId);
+    }
+
+    match /solicitacoes_orcamento/{solicitacaoId} {
+      allow get: if isValidId(solicitacaoId);
+      allow list: if existing().status in ['pendente', 'respondido', 'fechado', 'cancelado'];
+      allow create: if isValidId(solicitacaoId) && isValidSolicitacaoOrcamentoCreate(incoming());
+      allow update: if isValidId(solicitacaoId)
+        && isValidSolicitacaoOrcamentoFields(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'status',
+          'custo_fornecedor',
+          'margem_lucro',
+          'preco_final',
+          'condicoes_pagamento',
+          'paymentTerms',
+          'prazo_entrega',
+          'deliveryLeadTime',
+          'observacoes',
+          'notes',
+          'frete',
+          'freightCost',
+          'desconto',
+          'desconto_percentual',
+          'discountPercent',
+          'precos_itens',
+          'itens_proposta',
+          'estoque_baixado',
+          'peca_solicitada',
+          'horario_exibicao',
+          'timestamp_ms',
+          'data_atualizacao',
+          'updatedAt'
+        ]);
+      allow delete: if isValidId(solicitacaoId);
+    }
+  }
+}
